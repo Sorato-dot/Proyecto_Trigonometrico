@@ -26,13 +26,13 @@ flowchart TD
     H -- Sí --> J{¿Es division con divisor igual a cero?}
     J -- Sí --> K[Lanzar DivisionPorCeroException]
     K --> L[Capturar mensaje de division por cero]
-    L --> E[[Guardar calculo fallido con resultado NULL y mensaje]]
+    L --> E[[Guardar calculo fallido con resultado NULL y mensaje, con espera limitada ante bloqueos temporales de SQLite mediante busy_timeout en la conexion JDBC]]
 
     J -- No --> M[Calcular resultado en Java]
     M --> M2{¿El calculo produjo un resultado valido?}
     M2 -- No --> L2[Capturar mensaje de error del calculo]
     L2 --> E
-    M2 -- Sí --> N[[Guardar calculo exitoso con resultado]]
+    M2 -- Sí --> N[[Guardar calculo exitoso con resultado, con espera limitada ante bloqueos temporales de SQLite mediante busy_timeout en la conexion JDBC]]
 
     %% Camino de operaciones trigonometricas en Python
     I -- No --> P[/Solicitar modo de angulo al usuario/]

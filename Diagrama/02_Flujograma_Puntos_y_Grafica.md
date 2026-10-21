@@ -6,36 +6,48 @@ Este flujograma describe la validación de rangos, generación de puntos mediant
 ```mermaid
 flowchart TD
     A([Inicio]) --> B[/Solicitar funcion, xmin, xmax, paso y modo de angulo/]
-    B --> C{"¿xmin < xmax y paso > 0?"}
+    B --> C{¿La funcion existe y es trigonometrica?}
 
-    C -- No --> D[Generar mensaje 'Rango o paso invalido']
+    C -- No --> D[Generar mensaje de funcion no valida]
     D --> E[/Mostrar mensaje de error al usuario/]
     E --> Z([Fin])
 
-    C -- Sí --> F[[Guarda en BD encabezado de la serie]]
-    F --> G[Invocar Python trig.py serie con parametros]
-    G --> H{¿Python ejecuto la serie correctamente?}
+    C -- Sí --> F[Validar numeros, rango, paso y modo de angulo]
+    F --> G{¿Los parametros son validos?}
+    G -- No --> H[Generar mensaje de parametros invalidos]
+    H --> E
 
-    H -- No --> I[Capturar mensaje de error de Python]
-    I --> E
+    %% Python genera todos los puntos antes de almacenarlos
+    G -- Sí --> I[Invocar trig.py serie mediante ProcessBuilder]
+    I --> J{¿Python devolvio la serie sin error?}
+    J -- No --> K[Capturar mensaje de error de Python]
+    K --> E
+    J -- Sí --> L[Recibir lista de pares x;y]
+    L --> M{¿La lista contiene puntos?}
+    M -- No --> N[Generar mensaje de serie vacia]
+    N --> E
 
-    H -- Sí --> J[Recibir lista de pares x y devuelta por Python]
-    J --> K[Iterar sobre cada punto de la lista]
+    M -- Sí --> O[Validar formato y valores de todos los pares x;y]
+    O --> P{¿Todos los puntos tienen formato correcto?}
+    P -- No --> Q[Generar mensaje de puntos malformados]
+    Q --> E
+    P -- Sí --> R[Convertir y vacia en NULL y detectar puntos indefinidos]
 
-    K --> L{¿El punto contiene un valor y valido?}
-    L -- Sí --> M[[Guarda en BD punto con x e y]]
-    L -- No --> N[[Guarda en BD punto con x e y=NULL]]
+    %% La serie y sus puntos se guardan como una sola unidad
+    R --> S[[Guardar encabezado de serie y puntos en una transaccion]]
+    S --> T{¿Se confirmo el guardado completo con COMMIT?}
+    T -- No --> U[Revertir cambios pendientes con ROLLBACK]
+    U --> V[/Mostrar error de almacenamiento al usuario/]
+    V --> Z
 
-    M --> O{¿Quedan mas puntos por procesar?}
-    N --> O
-
-    O -- Sí --> K
-    O -- No --> P[Invocar Python graficar.py con la ruta BD e ID de serie]
-
-    P --> Q{¿graficar.py genero el archivo PNG correctamente?}
-    Q -- No --> R[Capturar error de generacion de grafica]
-    R --> E
-
-    Q -- Sí --> S[/Mostrar imagen PNG generada al usuario/]
-    S --> Z
+    %% graficar.py obtiene los puntos ya almacenados en SQLite
+    T -- Sí --> W[Invocar graficar.py con ruta BD, serie_id y archivo PNG]
+    W --> X{¿Se genero el PNG correctamente?}
+    X -- No --> Y[/Mostrar error de grafica e indicar que la serie esta guardada/]
+    Y --> Z
+    X -- Sí --> AA{¿Hay puntos con y igual a NULL?}
+    AA -- Sí --> AB[/Mostrar PNG y advertencia de puntos indefinidos/]
+    AB --> Z
+    AA -- No --> AC[/Mostrar PNG generado al usuario/]
+    AC --> Z
 ```

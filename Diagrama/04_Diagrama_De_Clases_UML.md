@@ -130,7 +130,7 @@ classDiagram
 
     %% SERVICIOS: REGLAS DEL NEGOCIO
     class CalculadoraService {
-        -operaciones: Map~String,Operacion~
+        -operaciones: Map
         -operacionDAO: OperacionDAO
         -calculoDAO: CalculoDAO
         +registrarOperacion(operacion: Operacion) void

@@ -221,21 +221,5 @@ classDiagram
     %% Las excepciones propias extienden CalculadoraException (RuntimeException).
 ```
 
-## Vista ampliada de las cardinalidades
-
-Este esquema muestra únicamente las relaciones lógicas entre las entidades de datos para facilitar la lectura de las multiplicidades. No añade clases ni tablas nuevas.
-
-```mermaid
-classDiagram
-    direction TB
-    class OperacionDTO
-    class CalculoDTO
-    class SerieDTO
-    class PuntoDTO
-
-    OperacionDTO "1" --> "0..*" CalculoDTO : registra
-    OperacionDTO "1" --> "0..*" SerieDTO : genera
-    SerieDTO "1" *-- "1..*" PuntoDTO : contiene
-```
 
 **Lectura:** una operación puede tener cero o muchos cálculos y series; cada cálculo o serie corresponde a una operación. Una serie contiene uno o varios puntos. La composición de SERIE y PUNTO representa su dependencia de ciclo de vida y es consistente con `ON DELETE CASCADE` en SQLite.
